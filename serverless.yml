@@ -1,0 +1,45 @@
+service: aws-node-screenshot-to-s3
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  stage: dev
+  region: us-east-1
+  runtime: nodejs12.x
+
+# Specify your bucket name here
+custom:
+  bucketName: "your-bucket-name"
+
+functions:
+  screenshotToS3:
+    handler: handler.screenshotToS3
+    environment:
+      BUCKET_NAME: ${self:custom.bucketName}
+
+# Create the Bucket and Bucket Policy for the Screenshots
+resources:
+  Resources:
+    ImageBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        AccessControl: PublicRead
+        BucketName: ${self:custom.bucketName}
+    ImageBucketPolicy:
+      Type: AWS::S3::BucketPolicy
+      Properties:
+        Bucket: !Ref ImageBucket
+        PolicyDocument:
+          Statement:
+            - Action:
+                - s3:GetObject
+              Effect: Allow
+              Principal: "*"
+              Resource: !Sub arn:aws:s3:::${ImageBucket}/*
+            - Action:
+                - s3:PutObject
+              Effect: Allow
+              Principal:
+                AWS:
+                 - !Sub arn:aws:iam::${AWS::AccountId}:role/aws-node-screenshot-to-s3-dev-us-east-1-lambdaRole
+              Resource: !Sub arn:aws:s3:::${ImageBucket}/*
