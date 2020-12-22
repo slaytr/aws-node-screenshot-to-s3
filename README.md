@@ -41,7 +41,7 @@ You can either invoke the function on it's own using:
 
 or provide a path to an event object that contains an url
 
-`sls invoke --function screenshotToS3 --path events/example.json`
+`sls invoke --function screenshotToS3 --path example-event.json`
 
 The lambda will return the entity tag and url of the object if successful in json format.
 ```json
